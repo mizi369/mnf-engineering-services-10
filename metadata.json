@@ -1,0 +1,9 @@
+{
+  "name": " MNF Engineering Enterprise 10",
+  "description": "Professional Enterprise Dashboard for MNF Engineering Services with WhatsApp Automation, Payroll, Inventory, and AI Integration. Operational at https://ais-dev-35hbr2u4oikdrbtsamwl7u-75610787709.asia-southeast1.run.app/",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
