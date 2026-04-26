@@ -16,12 +16,18 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, TABLES } from '../lib/db';
 import { InventoryItem, PaymentType, PaymentMethod } from '../types';
+import ConfirmModal from './ConfirmModal';
 
 export default function Inventory({ showToast }: { showToast: any }) {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null }>({
+    isOpen: false,
+    id: null
+  });
   
   const [shopInfo, setShopInfo] = useState({
     shopName: '',
@@ -235,11 +241,24 @@ export default function Inventory({ showToast }: { showToast: any }) {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Adakah anda pasti mahu memadam item ini?')) {
-      await db.delete(TABLES.INVENTORY, id);
-      showToast('Item berjaya dipadam', 'error');
+  const handleDelete = (id: string) => {
+    setConfirmDelete({ isOpen: true, id });
+  };
+
+  const onConfirmDelete = async () => {
+    if (!confirmDelete.id) return;
+    
+    try {
+      const { error } = await db.delete(TABLES.INVENTORY, confirmDelete.id);
+      if (error) throw error;
+      
+      showToast('Item berjaya dipadam', 'success');
       loadItems();
+    } catch (err) {
+      console.error('Delete error:', err);
+      showToast('Gagal memadam item', 'error');
+    } finally {
+      setConfirmDelete({ isOpen: false, id: null });
     }
   };
 
@@ -321,7 +340,6 @@ export default function Inventory({ showToast }: { showToast: any }) {
         </div>
       </div>
 
-      {/* Add/Edit Modal */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
@@ -511,6 +529,14 @@ export default function Inventory({ showToast }: { showToast: any }) {
         )}
       </AnimatePresence>
 
+      <ConfirmModal 
+        isOpen={confirmDelete.isOpen}
+        title="Sahkan Padam Inventori"
+        message="Adakah anda pasti mahu memadam item inventori ini? Tindakan ini tidak boleh diundur."
+        onConfirm={onConfirmDelete}
+        onCancel={() => setConfirmDelete({ isOpen: false, id: null })}
+      />
+
       <div className="glass-panel overflow-hidden">
         <div className="p-6 border-b border-white/10">
           <div className="relative max-w-md">
@@ -577,6 +603,7 @@ export default function Inventory({ showToast }: { showToast: any }) {
                         <Edit2 size={16} />
                       </button>
                       <button 
+                        id={`delete-inventory-${item.id}`}
                         onClick={() => handleDelete(item.id)} 
                         className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-all"
                         title="Padam"

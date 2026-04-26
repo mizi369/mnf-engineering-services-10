@@ -148,6 +148,8 @@ const App: React.FC = () => {
   const handleLogin = () => {
       setIsAuthenticated(true);
       setRole(localStorage.getItem('mnf_role') || 'admin');
+      setAdminName(localStorage.getItem('mnf_admin_name') || 'Admin MNF');
+      setAdminImage(localStorage.getItem('mnf_admin_image') || '');
       localStorage.setItem('mnf_auth', 'true');
   };
 

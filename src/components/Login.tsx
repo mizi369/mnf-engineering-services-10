@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Lock, Mail, ChevronRight, UserPlus, ShieldCheck, HelpCircle, RefreshCw } from 'lucide-react';
+import { Lock, Mail, ChevronRight, UserPlus, ShieldCheck, HelpCircle, RefreshCw, Chrome } from 'lucide-react';
+import { signInWithGoogle } from '../lib/firebase';
 
 interface LoginProps {
   onLogin: () => void;
@@ -19,6 +20,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [resetEmail, setResetEmail] = useState('');
   const [resetSuccess, setResetSuccess] = useState('');
   const [isResetting, setIsResetting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
       // Load custom branding if available
@@ -27,6 +29,26 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       if (savedLogo) setLogo(savedLogo);
       if (savedName) setCoName(savedName);
   }, []);
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const user = await signInWithGoogle();
+      if (user) {
+        // Here you might want to check if user exists in your DB or localStorage
+        // For now, we follow the existing pattern of setting role and logging in
+        localStorage.setItem('mnf_role', isSuperAdmin ? 'super_admin' : 'admin');
+        localStorage.setItem('mnf_admin_name', user.displayName || 'User Google');
+        localStorage.setItem('mnf_admin_image', user.photoURL || '');
+        onLogin();
+      }
+    } catch (err: any) {
+      setError('Gagal log masuk dengan Google: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,6 +278,26 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               >
                 {isSignUp ? 'Daftar Akaun' : 'Log Masuk'} <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
+
+              {!isSignUp && (
+                <>
+                  <div className="flex items-center gap-4 my-2">
+                    <div className="flex-1 h-[1px] bg-slate-100"></div>
+                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Atau</span>
+                    <div className="flex-1 h-[1px] bg-slate-100"></div>
+                  </div>
+
+                  <button 
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                    className="w-full bg-white border-2 border-slate-100 text-slate-900 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-50 transition-all flex items-center justify-center gap-3 active:scale-95 group shadow-sm disabled:opacity-50"
+                  >
+                    <Chrome size={20} className="text-cyan-600 group-hover:rotate-12 transition-transform" /> 
+                    {isLoading ? 'Menghubungkan...' : 'Continue with Google'}
+                  </button>
+                </>
+              )}
             </>
           )}
         </form>
