@@ -1,0 +1,15 @@
+run = "npm start"
+entrypoint = "service.ts"
+
+[modules]
+node = "nodejs-20"
+
+[nix]
+channel = "stable-23_11"
+
+[hints]
+typescript = true
+
+[deployment]
+run = ["npm", "start"]
+deploymentTarget = "cloudrun"

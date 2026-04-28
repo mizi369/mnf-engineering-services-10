@@ -7,6 +7,7 @@
   "scripts": {
     "start": "NODE_ENV=production tsx service.ts",
     "dev": "tsx service.ts",
+    "replit": "npm install && npm run dev",
     "build": "vite build",
     "railway-build": "vite build",
     "lint": "tsc --noEmit"
