@@ -826,9 +826,17 @@ function startWhatsApp() {
   client = new Client({
     authStrategy: new LocalAuth({ clientId: 'mnf-neural-v7', dataPath: './.wwebjs_auth' }),
     puppeteer: { 
-        headless: true, // Visual Browser Mode Disabled
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
-        executablePath: process.env.CHROME_BIN || undefined,
+        headless: true,
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox', 
+            '--disable-gpu', 
+            '--disable-dev-shm-usage',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process'
+        ],
+        executablePath: process.env.CHROME_BIN || '/usr/bin/chromium-browser',
     },
     qrMaxRetries: 5
   });

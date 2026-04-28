@@ -1,9 +1,9 @@
 { pkgs }: {
   deps = [
-    pkgs.nodejs_20
+    pkgs.nodejs-20_x
     pkgs.nodePackages.typescript-language-server
     pkgs.nodePackages.npm
-    # Dependencies needed for Puppeteer (WhatsApp Web)
+    # Chromium and dependencies for WhatsApp Web
     pkgs.chromium
     pkgs.glib
     pkgs.nss
