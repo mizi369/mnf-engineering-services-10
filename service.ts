@@ -836,7 +836,7 @@ function startWhatsApp() {
             '--no-zygote',
             '--single-process'
         ],
-        executablePath: process.env.CHROME_BIN || '/usr/bin/chromium-browser',
+        executablePath: process.env.CHROME_BIN || undefined,
     },
     qrMaxRetries: 5
   });
