@@ -996,7 +996,37 @@ io.on('connection', (socket) => {
             client=null; 
             WA_STATUS='OFFLINE'; 
             io.emit('stage-update', 'OFFLINE'); 
+            io.emit('sys-log', { time: new Date().toLocaleTimeString(), msg: 'WhatsApp Disconnected', type: 'info' });
         } 
+    });
+
+    socket.on('cmd-logout', async () => {
+        console.log('[SYSTEM] Logout requested. Clearing session...');
+        if (client) {
+            try {
+                await client.logout();
+                await client.destroy();
+            } catch (e) {
+                console.error('[WHATSAPP] Logout Error:', e.message);
+            }
+            client = null;
+        }
+        
+        // Manual session clear if logout fails or for extra safety
+        const sessionPath = path.resolve(__dirname, '.wwebjs_auth');
+        if (fs.existsSync(sessionPath)) {
+            try {
+                fs.rmSync(sessionPath, { recursive: true, force: true });
+                console.log('[SYSTEM] Session folder cleared');
+            } catch (e) {
+                console.error('[SYSTEM] Failed to delete session folder:', e.message);
+            }
+        }
+        
+        WA_STATUS = 'OFFLINE';
+        io.emit('stage-update', 'OFFLINE');
+        io.emit('qr-code', null); // Clear existing QR
+        io.emit('sys-log', { time: new Date().toLocaleTimeString(), msg: 'Session Cleared. Ready for new QR Scan.', type: 'success' });
     });
     socket.on('cmd-toggle-ai', (status) => { isAutoReplyActive = status; io.emit('ai-status', isAutoReplyActive); io.emit('sys-log', { time: new Date().toLocaleTimeString(), msg: `AI Status: ${status}`, type: 'info' }); });
 

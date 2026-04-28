@@ -247,6 +247,11 @@ const WhatsAppMonitor: React.FC = () => {
 
   const handleConnect = () => { socket.emit('cmd-connect'); setStatus('LAUNCHING'); };
   const handleDisconnect = () => { if(confirm("Putuskan sambungan WhatsApp?")) socket.emit('cmd-disconnect'); };
+  const handleLogout = () => {
+      if (confirm("Adakah anda pasti mahu Log Keluar dan Padam Sesi? Ini akan memadam sesi lama dan membolehkan anda scan QR kod baru.")) {
+          socket.emit('cmd-logout');
+      }
+  };
   const handleForceSync = () => { socket.emit('cmd-status-check'); addLog('Status Sync Requested...'); };
   
   const handleToggleAi = () => {
@@ -906,6 +911,11 @@ const WhatsAppMonitor: React.FC = () => {
                                   <Power size={16} /> {isScan ? "Cancel Setup" : "Disconnect System"}
                               </button>
                           )}
+
+                          {/* RESET SESSION BUTTON (FOR SCANNING NEW QR) */}
+                          <button onClick={handleLogout} className="w-full bg-orange-50 text-orange-600 py-3 rounded-xl font-black uppercase tracking-widest text-[9px] hover:bg-orange-100 transition-all border border-orange-100 flex items-center justify-center gap-3 active:scale-95 shadow-sm">
+                              <RefreshCw size={14} /> Reset Sesi & Scan Baru
+                          </button>
 
                           {/* FORCE SYNC BUTTON (HIDDEN HELPER) */}
                           <div className="flex gap-2">
