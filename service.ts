@@ -119,6 +119,7 @@ app.use(express.json());
 // ================= MEMORY & CONTEXT (LIVE STATE) =================
 let WA_STATUS = 'OFFLINE';
 let client = null;
+let LATEST_QR_CODE = null;
 let isAutoReplyActive = true; 
 let aiCampaigns = []; 
 let currentAdminInfo = null;
@@ -843,9 +844,11 @@ function startWhatsApp() {
 
 
   client.on('qr', (qr) => {
+    WA_STATUS = 'SCAN_QR';
     qrcode.toDataURL(qr, { scale: 10 }).then(url => {
+        LATEST_QR_CODE = url;
         io.emit('qr-code', url);
-        io.emit('stage-update', 'SCAN_QR');
+        io.emit('stage-update', WA_STATUS);
     }).catch(err => {
         console.error('[WHATSAPP] QR Generation Error:', err.message);
     });
@@ -855,6 +858,7 @@ function startWhatsApp() {
   client.on('ready', async () => {
     try {
       WA_STATUS = 'READY';
+      LATEST_QR_CODE = null;
       io.emit('stage-update', WA_STATUS);
       console.log('[WHATSAPP] Bridge Connected Successfully!');
 
@@ -953,6 +957,7 @@ function startWhatsApp() {
   client.on('disconnected', (reason) => {
       console.log('[WHATSAPP] Disconnected:', reason);
       client = null;
+      LATEST_QR_CODE = null;
       WA_STATUS = 'OFFLINE';
       io.emit('stage-update', WA_STATUS);
   });
@@ -982,6 +987,9 @@ io.on('connection', (socket) => {
     socket.on('cmd-connect', () => {
         if (client) {
             socket.emit('stage-update', WA_STATUS);
+            if (WA_STATUS === 'SCAN_QR' && LATEST_QR_CODE) {
+                socket.emit('qr-code', LATEST_QR_CODE);
+            }
             return;
         }
         startWhatsApp();
@@ -1011,7 +1019,9 @@ io.on('connection', (socket) => {
             }
             client = null;
         }
-        
+
+        LATEST_QR_CODE = null;
+
         // Manual session clear if logout fails or for extra safety
         const sessionPath = path.resolve(__dirname, '.wwebjs_auth');
         if (fs.existsSync(sessionPath)) {
@@ -1054,7 +1064,11 @@ io.on('connection', (socket) => {
     socket.on('cmd-status-check', async () => {
         socket.emit('stage-update', WA_STATUS);
         socket.emit('ai-status', isAutoReplyActive);
-        
+
+        if (WA_STATUS === 'SCAN_QR' && LATEST_QR_CODE) {
+            socket.emit('qr-code', LATEST_QR_CODE);
+        }
+
         if (currentAdminInfo) {
             socket.emit('admin-info', currentAdminInfo);
         } else if (client && client.info) {
@@ -1062,7 +1076,6 @@ io.on('connection', (socket) => {
             await fetchAdminProfile();
         }
     });
-
 
     // CRITICAL: Manual Profile Refresh Handler
     socket.on('cmd-refresh-profile', async () => {

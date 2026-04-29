@@ -649,28 +649,9 @@ const App: React.FC = () => {
 
            <div className={`flex-1 overflow-auto custom-scrollbar p-3 md:p-5 lg:p-6 ${isSidebarOpen ? 'pl-3 md:pl-6' : ''} relative`}>
               <AnimatePresence>
-                {!isSocketConnected && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px] pointer-events-none flex items-start justify-center pt-20"
-                  >
-                     <motion.div 
-                       initial={{ opacity: 0, y: -20 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       className="bg-red-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-400/50 pointer-events-auto"
-                     >
-                       <WifiOff size={20} className="animate-pulse" />
-                       <div>
-                         <p className="text-xs font-black uppercase tracking-widest">Sistem Luar Talian</p>
-                         <p className="text-[10px] font-bold opacity-80 uppercase tracking-tighter">Percubaan menyambung semula...</p>
-                       </div>
-                     </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <Routes>
+                 {/* Offline overlay removed to allow local-only usage */}
+               </AnimatePresence>
+               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/sales" element={<Sales showToast={showToast} />} />
                 <Route path="/bookings" element={<BookingManager showToast={showToast} />} />
