@@ -2,8 +2,11 @@
 import React from 'react';
 
 // Since we are using Vite middleware, the backend is on the same origin as the frontend
-export const APP_URL = (import.meta as any).env.VITE_APP_URL || window.location.origin;
-export const BACKEND_URL = (import.meta as any).env.VITE_BACKEND_URL || window.location.origin;
+const rawAppUrl = (import.meta as any).env.VITE_APP_URL || window.location.origin;
+const rawBackendUrl = (import.meta as any).env.VITE_BACKEND_URL || window.location.origin;
+
+export const APP_URL = rawAppUrl.endsWith('/') ? rawAppUrl.slice(0, -1) : rawAppUrl;
+export const BACKEND_URL = rawBackendUrl.endsWith('/') ? rawBackendUrl.slice(0, -1) : rawBackendUrl;
 
 console.log(`[SYSTEM] App URL: ${APP_URL}`);
 console.log(`[SYSTEM] Backend Target: ${BACKEND_URL}`);
